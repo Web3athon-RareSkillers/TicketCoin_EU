@@ -58,38 +58,17 @@ function Onboarding({ navigation }) {
           }
           setAuthorizationInProgress(true);
           await transact(async wallet => {
-            await authorizeSession(wallet);
-            navigation.navigate("Home")
+            await authorizeSession(wallet)
+            
+            console.log(wallet)
+
+          //  navigation.navigate("Home")
           });
         } finally {
           setAuthorizationInProgress(false);
         }
       }, [authorizationInProgress, authorizeSession]);
-    const handleConnectPress1 = useCallback(async () => {await transact(async wallet => {
-        // Transact starts a session with the wallet app during which our app
-        // can send actions (like `authorize`) to the wallet.
-        const authResult = await wallet.authorize({
-          cluster: 'devnet',
-          identity: APP_IDENTITY,
-        });
-        const {accounts, auth_token} = authResult;
-  
-        // After authorizing, store the authResult with the onConnect callback we pass into the button
-        console.log({
-          address: accounts[0].address,
-          label: accounts[0].label,
-          authToken: auth_token,
-          publicKey: getPublicKeyFromAddress(accounts[0].address),
-        });
-        login({
-            address: accounts[0].address,
-            label: accounts[0].label,
-            authToken: auth_token,
-            publicKey: getPublicKeyFromAddress(accounts[0].address),
-          })
-        navigation.navigate("Home")
-      })
-    });
+    
     return (
         <>
             <SafeAreaView >

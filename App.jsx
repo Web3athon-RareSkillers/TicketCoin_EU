@@ -14,6 +14,7 @@ import { AuthProvider } from './AuthContext';
 import { ConnectionProvider } from '@solana/wallet-adapter-react';
 import { AuthorizationProvider } from './src/components/AuthorizationProvider';
 import { clusterApiUrl } from '@solana/web3.js';
+import HomePg from './src/screens/HomePg';
 
 
 const Stack = createStackNavigator();
@@ -48,7 +49,7 @@ function customTransition() {
   };
 }
 function App() {
-  const DEVNET_ENDPOINT = clusterApiUrl('devnet');
+  const DEVNET_ENDPOINT = clusterApiUrl('mainnet-beta');
   return (
     <View style={{ flex: 1, backgroundColor: '#050203' }}>
       <NavigationContainer>
@@ -72,10 +73,11 @@ function App() {
                   };
                 },
               }}
-                initialRouteName="Splash">
+                initialRouteName="Onboard">
                 <Stack.Screen name="Splash" options={{ headerShown: false }} component={SplashScreen} />
                 <Stack.Screen name="Onboard" options={{ headerShown: false }} component={Onboarding} />
                 <Stack.Screen name="Home" options={{ headerShown: false }} component={Home} />
+                <Stack.Screen name="HomePg" options={{ headerShown: false }} component={HomePg} />
               </Stack.Navigator>
             </AuthProvider>
           </AuthorizationProvider>
