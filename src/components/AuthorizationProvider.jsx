@@ -80,7 +80,7 @@ function AuthorizationProvider(props) {
             identity: APP_IDENTITY
           })
         : wallet.authorize({
-            cluster: "devnet",
+            cluster:'mainnet-beta',
             identity: APP_IDENTITY
           }))
       return (await handleAuthorizationResult(authorizationResult))
