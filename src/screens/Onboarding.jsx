@@ -1,132 +1,225 @@
-
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from 'react';
 
 import {
-    Image,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    ImageBackground,
-    View,
-    Text,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  View,
+  Text,
+  Animated,
+  Dimensions,
 } from 'react-native';
-import { Column as Col, Row } from 'react-native-flexbox-grid';
-import RoundedButton from '../components/roundedButtons';
+import RoundedButton from '../components/roundedButton';
 import TransparentButton from '../components/transparentButton';
-import { useAuthorization } from '../components/AuthorizationProvider';
-import { transact } from '@solana-mobile/mobile-wallet-adapter-protocol';
-import { toUint8Array } from 'js-base64';
-import { PublicKey } from '@solana/web3.js';
-import { AuthContext } from '../../AuthContext';
-import { useConnection } from '@solana/wallet-adapter-react';
-
+import {useAuthorization} from '../components/AuthorizationProvider';
+import {transact} from '@solana-mobile/mobile-wallet-adapter-protocol';
+import {toUint8Array} from 'js-base64';
+import {PublicKey} from '@solana/web3.js';
+import {AuthContext} from '../../AuthContext';
+import {useConnection} from '@solana/wallet-adapter-react';
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export const APP_IDENTITY = {
-    name: "TicketCoin",
-    uri:  'https://ticketcoin.com',
-    icon: "../assets/images/logo_mini.png",
-  }
+  name: 'TicketCoin',
+  uri: 'https://ticketcoin.com',
+  icon: '../assets/images/logo_mini.png',
+};
 
+function getPublicKeyFromAddress(address) {
+  const publicKeyByteArray = toUint8Array(address);
+  return new PublicKey(publicKeyByteArray);
+}
 
-  function getPublicKeyFromAddress(address) {
-    const publicKeyByteArray = toUint8Array(address)
-    return new PublicKey(publicKeyByteArray)
-  }
-  function convertLamportsToSOL(lamports) {
-    return new Intl.NumberFormat(undefined, {maximumFractionDigits: 1}).format(
-      (lamports || 0) / LAMPORTS_PER_SOL,
-    );
-  }
-  
-  
+function convertLamportsToSOL(lamports) {
+  return new Intl.NumberFormat(undefined, {maximumFractionDigits: 1}).format(
+    (lamports || 0) / LAMPORTS_PER_SOL,
+  );
+}
+
 function getAccountFromAuthorizedAccount(account) {
-    return {
-      ...account,
-      publicKey: getPublicKeyFromAddress(account.address)
+  return {
+    ...account,
+    publicKey: getPublicKeyFromAddress(account.address),
+  };
+}
+
+function Onboarding({navigation}) {
+  const {authorizeSession} = useAuthorization();
+  const {connection} = useConnection();
+  const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
+  const {user, isLoading, login, logout} = useContext(AuthContext);
+
+  const handleConnectPress = useCallback(async () => {
+    try {
+      if (authorizationInProgress) {
+        return;
+      }
+      setAuthorizationInProgress(true);
+      await transact(async wallet => {
+        await authorizeSession(wallet);
+        navigation.navigate('Home');
+      });
+    } finally {
+      setAuthorizationInProgress(false);
     }
-  } 
-function Onboarding({ navigation }) {
-    const {authorizeSession} = useAuthorization();
-    const {connection} = useConnection();
-    const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
-    const { user, isLoading, login, logout } = useContext(AuthContext);
+  }, [authorizationInProgress, authorizeSession]);
 
-    const handleConnectPress = useCallback(async () => {
-        try {
-          if (authorizationInProgress) {
-            return;
-          }
-          setAuthorizationInProgress(true);
-          await transact(async wallet => {
-            await authorizeSession(wallet)
-            
-            console.log(wallet)
+  const skipConnection = () => {
+    navigation.navigate('Home');
+  };
 
-          //  navigation.navigate("Home")
-          });
-        } finally {
-          setAuthorizationInProgress(false);
-        }
-      }, [authorizationInProgress, authorizeSession]);
-    
-    return (
-        <>
-            <SafeAreaView >
+  const handleConnectPress1 = useCallback(async () => {
+    await transact(async wallet => {
+      // Transact starts a session with the wallet app during which our app
+      // can send actions (like `authorize`) to the wallet.
+      const authResult = await wallet.authorize({
+        cluster: 'mainnet-beta',
+        identity: APP_IDENTITY,
+      });
+      const {accounts, auth_token} = authResult;
 
+      // After authorizing, store the authResult with the onConnect callback we pass into the button
+      console.log({
+        address: accounts[0].address,
+        label: accounts[0].label,
+        authToken: auth_token,
+        publicKey: getPublicKeyFromAddress(accounts[0].address),
+      });
+      login({
+        address: accounts[0].address,
+        label: accounts[0].label,
+        authToken: auth_token,
+        publicKey: getPublicKeyFromAddress(accounts[0].address),
+      });
+      navigation.navigate('Home');
+    });
+  });
 
-                <StatusBar translucent={true} backgroundColor={'transparent'} />
+  // Animation for pulsing wallet image
+  const pulseAnimation = useRef(new Animated.Value(1)).current;
+  const verticalAnimation = useRef(new Animated.Value(0)).current;
 
-            </SafeAreaView>
+  const startAnimations = () => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(pulseAnimation, {
+            toValue: 1.1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(verticalAnimation, {
+            toValue: -10,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(verticalAnimation, {
+            toValue: 0,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
+    ).start();
+  };
 
-            <View style={{ flex: 1, justifyContent: "center", backgroundColor: "#050203" }}>
+  useEffect(() => {
+    startAnimations();
+  }, []);
+  return (
+    <>
+      <SafeAreaView>
+        <StatusBar translucent={true} backgroundColor={'transparent'} />
+      </SafeAreaView>
 
+      <View style={styles.container}>
+        <View style={styles.walletContainer}>
+          <Animated.Image
+            source={require('../assets/images/wallet.png')}
+            style={[
+              {
+                transform: [
+                  {scale: pulseAnimation},
+                  {translateY: verticalAnimation},
+                ],
+              },
+            ]}
+          />
+        </View>
 
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>Connect your wallet</Text>
+          <Text style={styles.subtitle}>
+            Attach your wallet to get full access of event tickets from booking,
+            buying and verifying
+          </Text>
+        </View>
 
-                <View style={{ padding: 30, flexDirection: "row", flex: 1, position: 'absolute' }}>
-                    <Col sm={12} >
-                        <Row size={12} style={{}}>
-
-                            <View style={{ flexDirection: 'row', marginTop: 100, alignItems: 'center' }}>
-                                <Image
-                                    source={require('../assets/images/wallet.png')}
-                                />
-                            </View>
-                        </Row>
-
-
-                        <Row size={12} style={{ marginTop: 20, marginBottom: 20, }}>
-                            <View style={{ flexDirection: 'column', marginTop: 80, alignItems: 'center' }}>
-                                <Text style={{
-                                    color: 'white', fontFamily: "NexaBold", fontSize: 18, textAlign: 'center',
-                                }}>Connect your wallet</Text>
-                                <Text style={{
-                                    color: '#999999', fontFamily: "NexaLight", fontSize: 16, marginTop: 10, textAlign: 'center',
-                                }}>Attach your wallet to get full access of event tickets from booking, buying and verifying</Text>
-
-                            </View>
-
-                        </Row>
-                        <Row size={12} style={{ marginTop: 35 }}>
-                            <RoundedButton onPress={() =>handleConnectPress()}  title={"Connect wallet"} />
-                        </Row>
-                        <Row size={12} style={{ marginTop: 20 }}>
-                            <TransparentButton title={"Skip for now"} />
-                        </Row>
-
-                    </Col>
-
-                </View >
-
-            </View >
-        </>
-    )
+        <View style={styles.buttonContainer}>
+          <RoundedButton
+            onPress={() => handleConnectPress()}
+            title={'Connect wallet'}
+          />
+          <TransparentButton
+            onPress={() => skipConnection()}
+            title={'Skip for now'}
+          />
+        </View>
+      </View>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-    },
+  container: {
+    padding: 16,
+    flexDirection: 'column',
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#0C0C0D',
+  },
+  walletContainer: {
+    marginTop: 140,
+    marginBottom: 64,
+  },
+  contentContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 56,
+  },
+  title: {
+    color: 'white',
+    fontFamily: 'NexaBold',
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: '#999999',
+    fontFamily: 'NexaLight',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flex: 1,
+    width: SCREEN_WIDTH - 32,
+    marginBottom: 64,
+    gap: 16,
+    maxHeight: 120,
+  },
 });
 
 export default Onboarding;
