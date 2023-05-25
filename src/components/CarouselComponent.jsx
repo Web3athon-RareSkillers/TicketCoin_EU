@@ -5,11 +5,19 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const CarouselComponent = ({data}) => {
   const renderCard = ({item, index}) => {
+    let source={}
+    if(item.collection){
+      source={uri:item.image}
+
+     }
+     else{
+      source=item.image
+     }
     if (index === 0) {
       // If the card is the first one, set the left margin to avoid centering
       return (
-        <View style={[styles.cardContainer, {marginLeft: 16}]}>
-          <Image style={styles.cardImage} source={item.image} />
+        <View style={[styles.cardContainer, {marginLeft: 0}]}>
+          <Image style={styles.cardImage} source={source} />
           {item.title ? (
             <View style={styles.cardPillContainer}>
               <View style={styles.cardPill}>
@@ -38,7 +46,7 @@ const CarouselComponent = ({data}) => {
     } else {
       return (
         <View style={styles.cardContainer}>
-          <Image style={styles.cardImage} source={item.image} />
+          <Image style={styles.cardImage} source={source}/>
           {item.title ? (
             <View style={styles.cardPillContainer}>
               <View style={styles.cardPill}>

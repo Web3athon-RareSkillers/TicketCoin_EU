@@ -156,12 +156,12 @@ export default function Home({navigation}) {
             </Row>
           </Col>
         </View>
-        <View style={globalStyles.floatingContainer}>
+        {/* <View style={globalStyles.floatingContainer}>
           <RoundedButton
             onPress={() => navigation.navigate('VerifyAttendee')}
             subTitle={'+   Verify Attendee'}
           />
-        </View>
+        </View> */}
       </View>
       <View style={globalStyles.footerContainer}>
         <Footer></Footer>

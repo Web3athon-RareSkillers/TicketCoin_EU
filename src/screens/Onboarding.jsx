@@ -17,12 +17,16 @@ import {
 } from 'react-native';
 import RoundedButton from '../components/roundedButton';
 import TransparentButton from '../components/transparentButton';
-import {useAuthorization} from '../components/AuthorizationProvider';
-import {transact} from '@solana-mobile/mobile-wallet-adapter-protocol';
-import {toUint8Array} from 'js-base64';
-import {PublicKey} from '@solana/web3.js';
-import {AuthContext} from '../../AuthContext';
-import {useConnection} from '@solana/wallet-adapter-react';
+import { useAuthorization } from '../components/AuthorizationProvider';
+import { transact } from '@solana-mobile/mobile-wallet-adapter-protocol';
+import { toUint8Array } from 'js-base64';
+import { AuthContext } from '../../AuthContext';
+
+
+
+import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { Metaplex } from '@metaplex-foundation/js';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export const APP_IDENTITY = {
@@ -37,7 +41,7 @@ function getPublicKeyFromAddress(address) {
 }
 
 function convertLamportsToSOL(lamports) {
-  return new Intl.NumberFormat(undefined, {maximumFractionDigits: 1}).format(
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(
     (lamports || 0) / LAMPORTS_PER_SOL,
   );
 }
@@ -49,20 +53,82 @@ function getAccountFromAuthorizedAccount(account) {
   };
 }
 
-function Onboarding({navigation}) {
-  const {authorizeSession} = useAuthorization();
-  const {connection} = useConnection();
-  const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
-  const {user, isLoading, login, logout} = useContext(AuthContext);
+function Onboarding({ navigation }) {
+  const { authorizeSession } = useAuthorization();
+  const [collections, setCollections] = useState([]);
 
+  const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+  const metaplex = new Metaplex(connection);
+
+  const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
+  const { user, isLoading, login, logout } = useContext(AuthContext);
+  function parseNFTMetadata(data) {
+    console.log(data)
+    // Implement your own parsing logic based on the metadata structure of your NFTs
+    // Example: return JSON.parse(data);
+    return null; // Return null if parsing fails or metadata is not available
+  }
   const handleConnectPress = useCallback(async () => {
     try {
       if (authorizationInProgress) {
         return;
       }
       setAuthorizationInProgress(true);
+
       await transact(async wallet => {
-        await authorizeSession(wallet);
+        const authResult = await wallet.authorize({
+          cluster: 'mainnet-beta',
+          identity: APP_IDENTITY,
+        });
+        const { accounts, auth_token } = authResult;
+        let pubk = getPublicKeyFromAddress(accounts[0].address)
+        let nftCollection = []
+
+        // After authorizing, store the authResult with the onConnect callback we pass into the button
+        // console.log({
+        //   address: accounts[0].address,
+        //   label: accounts[0].label,
+        //   authToken: auth_token,
+        //   publicKey: getPublicKeyFromAddress(accounts[0].address),
+        // });
+        try {
+          const tokenAccounts = await connection.getTokenAccountsByOwner(
+            pubk,
+            {
+              programId: TOKEN_PROGRAM_ID,
+            }
+          );
+         
+          // console.log("Token                                         Balance");
+          // console.log("------------------------------------------------------------");
+          tokenAccounts.value.forEach(async (tokenAccount) => {
+            const accountData = AccountLayout.decode(tokenAccount.account.data);
+
+            // console.log(`${new PublicKey(accountData.mint)}   ${accountData.amount}`);
+            const mintAddress = new PublicKey(accountData.mint)
+            const nft = await metaplex.nfts().findByMint({ mintAddress });
+
+            
+            if (nft.uri) {
+              let response = await fetch(nft.uri);
+              let json = await response.json();
+              nftCollection.push({id:nftCollection.length+1,title:json.name,image:json.image,collection:true})
+
+            }
+          })
+
+          login({
+            address: accounts[0].address,
+            label: accounts[0].label,
+            authToken: auth_token,
+            publicKey: getPublicKeyFromAddress(accounts[0].address),
+            nftCollection:nftCollection
+          });
+
+        }
+        catch (err) {
+          console.error(err)
+        }
         navigation.navigate('Home');
       });
     } finally {
@@ -74,32 +140,7 @@ function Onboarding({navigation}) {
     navigation.navigate('Home');
   };
 
-  const handleConnectPress1 = useCallback(async () => {
-    await transact(async wallet => {
-      // Transact starts a session with the wallet app during which our app
-      // can send actions (like `authorize`) to the wallet.
-      const authResult = await wallet.authorize({
-        cluster: 'mainnet-beta',
-        identity: APP_IDENTITY,
-      });
-      const {accounts, auth_token} = authResult;
 
-      // After authorizing, store the authResult with the onConnect callback we pass into the button
-      console.log({
-        address: accounts[0].address,
-        label: accounts[0].label,
-        authToken: auth_token,
-        publicKey: getPublicKeyFromAddress(accounts[0].address),
-      });
-      login({
-        address: accounts[0].address,
-        label: accounts[0].label,
-        authToken: auth_token,
-        publicKey: getPublicKeyFromAddress(accounts[0].address),
-      });
-      navigation.navigate('Home');
-    });
-  });
 
   // Animation for pulsing wallet image
   const pulseAnimation = useRef(new Animated.Value(1)).current;
@@ -152,8 +193,8 @@ function Onboarding({navigation}) {
             style={[
               {
                 transform: [
-                  {scale: pulseAnimation},
-                  {translateY: verticalAnimation},
+                  { scale: pulseAnimation },
+                  { translateY: verticalAnimation },
                 ],
               },
             ]}

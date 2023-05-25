@@ -1,14 +1,22 @@
-import React, {useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import {Image, View, Text, TouchableOpacity} from 'react-native';
-import {Column as Col, Row} from 'react-native-flexbox-grid';
+import { Image, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { Column as Col, Row } from 'react-native-flexbox-grid';
 import SearchBar from '../components/SearchBar';
 import RoundedButton from '../components/roundedButton';
 import Footer from '../components/Footer';
 import globalStyles from '../globalStyles';
+import { AuthContext } from '../../AuthContext';
+import CarouselComponent from '../components/CarouselComponent';
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
-export default function Collections({navigation}) {
+export default function Collections({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const { user, isLoading, login, logout } = useContext(AuthContext);
+  useEffect(()=>{
+console.log(user)
+
+  }, [])
   return (
     <>
       <View style={globalStyles.mainContainer}>
@@ -83,14 +91,13 @@ export default function Collections({navigation}) {
                 </TouchableOpacity>
               </View>
             </Row>
+            <Row size={12} style={styles.carouselRow}>
+              {user && <CarouselComponent
+                data={user.nftCollection}></CarouselComponent>}
+            </Row>
           </Col>
         </View>
-        <View style={globalStyles.floatingContainer}>
-          <RoundedButton
-            onPress={() => navigation.navigate('VerifyAttendee')}
-            subTitle={'+   Verify Attendee'}
-          />
-        </View>
+
       </View>
       <View style={globalStyles.footerContainer}>
         <Footer></Footer>
@@ -98,3 +105,42 @@ export default function Collections({navigation}) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    flexDirection: 'column',
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#0C0C0D',
+  },
+  walletContainer: {
+    marginTop: 140,
+    marginBottom: 64,
+  },
+  contentContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 56,
+  },
+  title: {
+    color: 'white',
+    fontFamily: 'NexaBold',
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: '#999999',
+    fontFamily: 'NexaLight',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flex: 1,
+    width: SCREEN_WIDTH - 32,
+    marginBottom: 64,
+    gap: 16,
+    maxHeight: 120,
+  },
+});
