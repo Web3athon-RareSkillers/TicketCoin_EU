@@ -1,9 +1,11 @@
 import React from 'react';
-import {View, StyleSheet, Image, Text, Dimensions} from 'react-native';
+import {View, StyleSheet, Image, Text, Dimensions, Touchable} from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Carousel from 'react-native-snap-carousel';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const CarouselComponent = ({data}) => {
+const CarouselComponent = ({data,navigation}) => {
+
   const renderCard = ({item, index}) => {
     let source={}
     if(item.collection){
@@ -16,7 +18,8 @@ const CarouselComponent = ({data}) => {
     if (index === 0) {
       // If the card is the first one, set the left margin to avoid centering
       return (
-        <View style={[styles.cardContainer, {marginLeft: 0}]}>
+        <TouchableOpacity   onPress={() => navigation.navigate('NFTMint')}>
+        <View style={[styles.cardContainer, {marginLeft: 0}]} >
           <Image style={styles.cardImage} source={source} />
           {item.title ? (
             <View style={styles.cardPillContainer}>
@@ -42,9 +45,11 @@ const CarouselComponent = ({data}) => {
             </View>
           )}
         </View>
+        </TouchableOpacity>
       );
     } else {
       return (
+        <TouchableOpacity   onPress={() => navigation.navigate('NFTMint')}>
         <View style={styles.cardContainer}>
           <Image style={styles.cardImage} source={source}/>
           {item.title ? (
@@ -61,6 +66,7 @@ const CarouselComponent = ({data}) => {
             </View>
           )}
         </View>
+        </TouchableOpacity>
       );
     }
   };

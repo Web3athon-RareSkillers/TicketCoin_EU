@@ -17,6 +17,7 @@ import {AuthorizationProvider} from './src/components/AuthorizationProvider';
 import {clusterApiUrl} from '@solana/web3.js';
 import Scanning from './src/screens/Scanning';
 import SplashScreen from 'react-native-splash-screen';
+import NFTMint from './src/screens/NFTMint';
 
 const Stack = createStackNavigator();
 
@@ -102,6 +103,11 @@ function App() {
                   name="Account"
                   options={{headerShown: false}}
                   component={Account}
+                />
+                <Stack.Screen
+                  name="NFTMint"
+                  options={{headerShown: false}}
+                  component={NFTMint}
                 />
                 <Stack.Screen
                   name="Notification"

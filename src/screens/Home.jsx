@@ -91,7 +91,7 @@ export default function Home({navigation}) {
               <Text style={globalStyles.textMediumBold}>Featured Event</Text>
             </Row>
             <Row size={12} style={styles.carouselRow}>
-              <CarouselComponent
+              <CarouselComponent navigation={navigation}
                 data={featuredEventsSliderData}></CarouselComponent>
             </Row>
             <Row size={12} style={styles.titleRow}>
@@ -152,7 +152,7 @@ export default function Home({navigation}) {
               </View>
             </Row>
             <Row size={12} style={styles.carouselRow}>
-              <CarouselComponent data={allEventsSliderData}></CarouselComponent>
+              <CarouselComponent navigation={navigation} data={allEventsSliderData}></CarouselComponent>
             </Row>
           </Col>
         </View>

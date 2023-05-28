@@ -92,7 +92,7 @@ console.log(user)
               </View>
             </Row>
             <Row size={12} style={styles.carouselRow}>
-              {user && <CarouselComponent
+              {user && <CarouselComponent navigation={navigation}
                 data={user.nftCollection}></CarouselComponent>}
             </Row>
           </Col>

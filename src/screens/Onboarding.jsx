@@ -57,7 +57,7 @@ function Onboarding({ navigation }) {
   const { authorizeSession } = useAuthorization();
   const [collections, setCollections] = useState([]);
 
-  const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+  const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
   const metaplex = new Metaplex(connection);
 
   const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
@@ -77,7 +77,7 @@ function Onboarding({ navigation }) {
 
       await transact(async wallet => {
         const authResult = await wallet.authorize({
-          cluster: 'mainnet-beta',
+          cluster: 'devnet',
           identity: APP_IDENTITY,
         });
         const { accounts, auth_token } = authResult;
@@ -122,7 +122,8 @@ function Onboarding({ navigation }) {
             label: accounts[0].label,
             authToken: auth_token,
             publicKey: getPublicKeyFromAddress(accounts[0].address),
-            nftCollection:nftCollection
+            nftCollection:nftCollection,
+            auth_token:auth_token
           });
 
         }
