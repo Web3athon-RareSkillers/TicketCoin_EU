@@ -18,6 +18,7 @@ import {clusterApiUrl} from '@solana/web3.js';
 import Scanning from './src/screens/Scanning';
 import SplashScreen from 'react-native-splash-screen';
 import NFTMint from './src/screens/NFTMint';
+import QRScreen from './src/screens/QRScreen';
 
 const Stack = createStackNavigator();
 
@@ -108,6 +109,11 @@ function App() {
                   name="NFTMint"
                   options={{headerShown: false}}
                   component={NFTMint}
+                />
+                <Stack.Screen
+                  name="QRScreen"
+                  options={{headerShown: false}}
+                  component={QRScreen}
                 />
                 <Stack.Screen
                   name="Notification"

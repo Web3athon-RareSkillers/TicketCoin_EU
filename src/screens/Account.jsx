@@ -5,6 +5,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid';
 import SearchBar from '../components/SearchBar';
 import RoundedButton from '../components/roundedButton';
 import Footer from '../components/Footer';
+import globalStyles from '../globalStyles';
 
 export default function Account({navigation}) {
   return (
@@ -25,7 +26,10 @@ export default function Account({navigation}) {
                     flexDirection: 'row',
                     alignItems: 'center',
                   }}>
-                  <Image source={require('../assets/images/logo_mini.png')} />
+                  <Image
+                    style={globalStyles.logo}
+                    source={require('../assets/images/logo_mini.png')}
+                  />
                   <Text
                     style={{
                       color: 'white',

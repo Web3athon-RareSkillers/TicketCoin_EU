@@ -19,14 +19,13 @@ import { APP_IDENTITY } from './Onboarding';
 import { Buffer } from 'buffer';
 import { TextEncoder } from 'fast-text-encoding'
 import { ScrollView } from 'react-native';
-import Toast from 'react-native-simple-toast';
 
 
 // import {TextEncoder} from 'text-encoding';
 
 
 
-export default function NFTMint({ navigation }) {
+export default function QRScreen({ navigation }) {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const { user, isLoading, login, logout } = useContext(AuthContext);
     const connection = new Web3.Connection(Web3.clusterApiUrl('devnet'));
@@ -34,19 +33,13 @@ export default function NFTMint({ navigation }) {
     const TOKEN_PROGRAM = "7CfS9hfXmqejz69Dx7kPhKxyNUwt1F8gmRTvAp1KyD3f"
     const ticketcoinSolanaProgram = new Web3.PublicKey("7CfS9hfXmqejz69Dx7kPhKxyNUwt1F8gmRTvAp1KyD3f")
     const memoProgramId = new Web3.PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
-   
+
 
     useEffect(() => {
         console.log(user)
 
     }, [])
     async function handleMinting() {
-        Toast.show('Authenticatinig from wallet', Toast.SHORT);
-
-        setTimeout(()=>{
-            Toast.show('Success', Toast.SHORT);
-            navigation.navigate("QRScreen");},2000)
-        
         // const myWallet = Keypair.generate();
         // await transact(async (mobileWallet) => {
         //     const authorizationResult = await mobileWallet.reauthorize({
@@ -204,22 +197,16 @@ export default function NFTMint({ navigation }) {
 
                     <Image
                         style={{ height: 400, width: 330, resizeMode: 'contain' }}
-                        source={require('../assets/images/mint.png')}
+                        source={require('../assets/images/qr.png')}
                     />
                     <Text style={{ width: 330 }}>
-                        The Coachella Music Festival is an annual music and arts festival that takes place in the desert city of Indio, California. The festival features a diverse range of musical genres including rock, hip hop, electronic, and indie music. Alongside the music, there are also art installations, food vendors, and other immersive experiences.
+                        Show this QR Code while entering event.
                         {"\n"}{"\n"}
 
-                        Event Details: Event Name: Coachella Music Festival Date: April 15 - 17, 2023 Location: Indio, California
-                        Event Description: The Coachella Music Festival is an annual music and arts festival that takes place in the desert city of Indio, California. The festival features a diverse range of musical genres including rock, hip hop, electronic, and indie music. Alongside the music, there are also art installations, food vendors, and other immersive experiences.
-                        {"\n"}{"\n"}
 
                     </Text>
                     <View style={{ paddingBottom: 120 }}>
-                        <RoundedButton
-                            onPress={() => handleMinting()}
-                            title={' Generate QR Code'}
-                        />
+
 
 
                     </View>

@@ -215,7 +215,7 @@ function Onboarding({ navigation }) {
             onPress={() => handleConnectPress()}
             title={'Connect wallet'}
           />
-          <TransparentButton
+          <TransparentButton style={{margin:20}}
             onPress={() => skipConnection()}
             title={'Skip for now'}
           />
@@ -256,11 +256,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonContainer: {
+    marginBottom: 48,
     flex: 1,
+    justifyContent: 'center',
     width: SCREEN_WIDTH - 32,
-    marginBottom: 64,
-    gap: 16,
-    maxHeight: 120,
+    justifyContent:"space-between",
+    height:200
   },
 });
 
